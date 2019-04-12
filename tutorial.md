@@ -92,12 +92,95 @@ class Square extends React.Component {
 -->
 #NOTE
 자바스크립트 클래스에서 constructor의 subclass를 정의할때 항상 super 를 붙어야한다. 모든 리액트 컴포넌트 constructor를 가지고 있는 클래스들은 super(props) 를 사용해야한다.
+#subclasses 를 사용할때 꼭 super(props) 라고 정의해야한다.
 
 이제 우리는 Square render 메서드를 바꿔서 클릭할때마다 현재 상태의 value가 나타나게 해야한다 .
+->value 를 null로 하는 이유?
 
 <button> 태그 안에 this.props.value 대신 this.state.value 를 적어라.
-onClic={..} event handler 대신에 onClick={()=> this.setState({value: 'X})} 를 대신한다.
+onClick={..} event handler 대신에 onClick={()=> this.setState({value: 'X})} 를 대신한다.
 className과 onClick props를 읽기 좋게 다른 라인에 적어놓는다.
 
-해당 변화가 이루어지면 Square <button> 태그는 
+해당 변화가 이루어지면 Square reder 메소드로 return 된 Square <button> 태그는 
+-->
+```Javascript
+class Square extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            value:null,
+        };
+    }
 
+    render() {
+        return (
+            <button className='square' onClick={() => this.setState({value:'X'})}>
+            {this.state.value}
+            </button>
+        );
+    }
+}
+```
+-->
+Square 메소드 있는 onClick handler애 this.setState 우리는 <button> 이 클릭이 되었을떄마다 리액트가 square를 다시 render 하게한다. 업데이트 후에는 Square의 this.state.value 가 'X' 가 될 것이다. 그래서 우리가 게임보드에 X를 볼수 있는 것이다. 만약 아무 Square를 누른다면 X가 나타날 것이다. 그래서 해당 컴포넌트를 실행시키면 각 박스를 누를때마다 x가 나오는 것을 볼수가 있다.
+
+? 그럼 여기에서 state 는 기억해야할 props 인데 여기에서 
+
+setState 이라는 컴포넌트는 리액트에서 자동적으로 child component (자식 컴포넌트)를 업데이트를 한다.
+
+# State 를 올려라
+현재 각각의 Square 컴포넌트는 게임의 state 를 유지시킨다. 우승자를 확인하기 위해서 우리는 9칸에 각각의 value 를 넣을 것이다. 
+
+우리가 생각하기에는 보드가 Square 에 각각의 Square 의 state를 물어봐야한다고 생각한다. 리액트에서 해당 접근이 가능하지만 코드가 복잡해지므로 이름 허용하지 않는다. 가장 좋은 밥법은 보드 컴포넌트가 각각의 Square의 props를 나열하면서 보여줄수 잇다.
+
+multiple children으로부터 아님 두개 그이상의 자식 컴포넌트의 데이터를 모우기위해서는 parent 컴포넌드를 다시 children 컴포넌트를 props를 사용하여 전달할 수 있다. 이는 자식 컴포넌트들이 서로 그리고 부모 요소들과 함께 싱크로나이즈 될수 있도록 한다.
+
+예시) Board 에 constructer 을 만들고 보드의 초기 단계를 나열되는 9개의 null 이 들어갈수 있게 해봐라
+
+--->
+```Javascript
+class Board extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state={
+            squarers: Array(9).fill(null),
+        };
+    }
+
+    renderSquare(i) {
+        return <Square valve={i} />;
+    }
+}
+```
+나중에 보드를 체우면 this.stae.squares array는 이렇게 보일것임
+
+-->
+```Javascript
+[
+    '0', null, 'X',
+    'X', 'X, '0',
+    '0', null, null,
+
+]
+```
+-> ? 음 그럼 여기에 null 만 있어야하는거아닌가?
+
+보드의 renderSquare 매소드는 현재 이럴게 되어있다.
+
+-->
+```Javascript
+
+renderSquare(i) {
+    return <Square value={i} />;
+}
+```
+처음에는 보드의 value props를  각 상자에 0부터 8까지의 숫자를 보여주도록 전달하였다. 다른 단계에서는 우리는 숫자대신 Square의 state를 'X'로 지정하여 숫자대신 상자에 'X' 를 집어 넣었다. 이것이 현재 Square 이 value props를 무시하는 이유이다.
+
+우리는 다시 prop를 사용하여 전달하는 방법을 다시 사용해야한다. 우리는 보드를 수정하여 각 Square안에 현재의 value ('X', '0', or null)를 지시해야한다? 우리는 먼저  square 나열을 Board의 컨스트럭터에 정의를 해보았따 그리고 우리는 Board의 renderSquare 메소드를 통해 수정할 것이다.?
+
+-->
+```Javascript
+renderSquare(i) {
+    return <Square value={this.state.squares[i]}/>;
+}
+```

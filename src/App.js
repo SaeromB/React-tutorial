@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import Board from './components/boardComponent';
-import './index.js';
 
 class App extends Component {
   render() {
